@@ -41,6 +41,13 @@ func (config *DBConfig) InitDB() *gorm.DB {
 }
 
 func MigrateDB(db *gorm.DB) {
+	db.Exec(`DO $$ BEGIN
+		CREATE TYPE role AS ENUM ('admin', 'user');
+	EXCEPTION WHEN duplicate_object THEN null; END $$;`)
+	db.Exec(`DO $$ BEGIN
+		CREATE TYPE record_type AS ENUM ('income', 'expense');
+	EXCEPTION WHEN duplicate_object THEN null; END $$;`)
+
 	err := db.AutoMigrate(
 		&model.User{},
 		&model.Category{},
