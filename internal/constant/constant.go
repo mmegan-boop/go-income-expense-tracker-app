@@ -1,0 +1,21 @@
+package constant
+
+const PORT = "PORT"
+
+const (
+	DB_HOST     = "DB_HOST"
+	DB_PORT     = "DB_PORT"
+	DB_USERNAME = "DB_USERNAME"
+	DB_PASSWORD = "DB_PASSWORD"
+	DB_NAME     = "DB_NAME"
+)
+
+const (
+	JWT_SECRET_KEY      = "JWT_SECRET_KEY"
+	JWT_EXPIRE_DURATION = "JWT_EXPIRE_DURATION"
+)
+
+const (
+	AI_API_KEY = "AI_API_KEY"
+	AI_MODEL   = "AI_MODEL"
+)
