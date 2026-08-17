@@ -29,6 +29,13 @@ func (c *CategoryController) Create(ctx *echo.Context) error {
 		})
 	}
 
+	if err := ctx.Validate(&req); err != nil {
+		return ctx.JSON(http.StatusBadRequest, dto.Response[any]{
+			Status:  http.StatusBadRequest,
+			Message: err.Error(),
+		})
+	}
+
 	category, err := c.categoryService.Create(req)
 	if err != nil {
 		return ctx.JSON(http.StatusInternalServerError, dto.Response[any]{
@@ -106,6 +113,13 @@ func (c *CategoryController) Update(ctx *echo.Context) error {
 		return ctx.JSON(http.StatusBadRequest, dto.Response[any]{
 			Status:  http.StatusBadRequest,
 			Message: "invalid request body",
+		})
+	}
+
+	if err := ctx.Validate(&req); err != nil {
+		return ctx.JSON(http.StatusBadRequest, dto.Response[any]{
+			Status:  http.StatusBadRequest,
+			Message: err.Error(),
 		})
 	}
 

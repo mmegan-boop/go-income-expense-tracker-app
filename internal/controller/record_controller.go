@@ -38,6 +38,13 @@ func (c *RecordController) Create(ctx *echo.Context) error {
 		})
 	}
 
+	if err := ctx.Validate(&req); err != nil {
+		return ctx.JSON(http.StatusBadRequest, dto.Response[any]{
+			Status:  http.StatusBadRequest,
+			Message: err.Error(),
+		})
+	}
+
 	record, err := c.recordService.Create(uint(userID), req)
 	if err != nil {
 		if errors.Is(err, service.ErrInvalidRecord) {
@@ -152,6 +159,13 @@ func (c *RecordController) Update(ctx *echo.Context) error {
 		return ctx.JSON(http.StatusBadRequest, dto.Response[any]{
 			Status:  http.StatusBadRequest,
 			Message: "invalid request body",
+		})
+	}
+
+	if err := ctx.Validate(&req); err != nil {
+		return ctx.JSON(http.StatusBadRequest, dto.Response[any]{
+			Status:  http.StatusBadRequest,
+			Message: err.Error(),
 		})
 	}
 

@@ -28,6 +28,13 @@ func (c *AuthController) Register(ctx *echo.Context) error {
 		})
 	}
 
+	if err := ctx.Validate(&req); err != nil {
+		return ctx.JSON(http.StatusBadRequest, dto.Response[any]{
+			Status:  http.StatusBadRequest,
+			Message: err.Error(),
+		})
+	}
+
 	user, err := c.authService.Register(req)
 	if err != nil {
 		switch {
@@ -63,6 +70,13 @@ func (c *AuthController) Login(ctx *echo.Context) error {
 		return ctx.JSON(http.StatusBadRequest, dto.Response[any]{
 			Status:  http.StatusBadRequest,
 			Message: "invalid request body",
+		})
+	}
+
+	if err := ctx.Validate(&req); err != nil {
+		return ctx.JSON(http.StatusBadRequest, dto.Response[any]{
+			Status:  http.StatusBadRequest,
+			Message: err.Error(),
 		})
 	}
 

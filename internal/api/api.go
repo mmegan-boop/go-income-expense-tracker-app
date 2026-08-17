@@ -5,6 +5,7 @@ import (
 	appmiddleware "go-income-expense-tracker-app/internal/middleware"
 	"go-income-expense-tracker-app/internal/repository"
 	"go-income-expense-tracker-app/internal/service"
+	appvalidator "go-income-expense-tracker-app/internal/validator"
 
 	echojwt "github.com/labstack/echo-jwt/v5"
 	"github.com/labstack/echo/v5"
@@ -19,6 +20,9 @@ func NewEcho(db *gorm.DB, jwtConfig appmiddleware.JWTConfig) *echo.Echo {
 
 	// Register middleware for recovering from unexpected panics.
 	e.Use(middleware.Recover())
+
+	// Register custom validator for request validation.
+	e.Validator = appvalidator.New()
 
 	// Initialize repositories for database access.
 	authRepository := repository.NewAuthRepository(db)

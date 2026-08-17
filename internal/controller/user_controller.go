@@ -69,6 +69,13 @@ func (c *UserController) UpdateProfile(ctx *echo.Context) error {
 		})
 	}
 
+	if err := ctx.Validate(&req); err != nil {
+		return ctx.JSON(http.StatusBadRequest, dto.Response[any]{
+			Status:  http.StatusBadRequest,
+			Message: err.Error(),
+		})
+	}
+
 	user, err := c.userService.Update(userID, req)
 	if err != nil {
 		if errors.Is(err, service.ErrUserNotFound) {
