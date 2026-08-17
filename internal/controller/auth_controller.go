@@ -89,3 +89,10 @@ func (c *AuthController) Login(ctx *echo.Context) error {
 		},
 	})
 }
+
+func (c *AuthController) Logout(ctx *echo.Context) error {
+	return ctx.JSON(http.StatusOK, dto.Response[any]{
+		Status:  http.StatusOK,
+		Message: "logged out successfully",
+	})
+}

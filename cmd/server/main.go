@@ -9,7 +9,10 @@ import (
 	"go-income-expense-tracker-app/internal/utils"
 )
 
+// main initializes the application configuration, database connection,
+// JWT configuration, HTTP server, and starts the application.
 func main() {
+	// Load database configuration from environment variables.
 	dbConfig := db.DBConfig{
 		Username: utils.GetConfig(constant.DB_USERNAME),
 		Password: utils.GetConfig(constant.DB_PASSWORD),
@@ -18,17 +21,20 @@ func main() {
 		Port:     utils.GetConfig(constant.DB_PORT),
 	}
 
-	var (
-		repository = dbConfig.InitDB()
-		jwtConfig  = config.LoadJWTConfig()
-	)
+	// Initialize the database repository and JWT configuration.
+	repository := dbConfig.InitDB()
+	jwtConfig := config.LoadJWTConfig()
 
+	// Run database migrations when needed.
 	// db.MigrateDB(repository)
 
+	// Initialize the Echo HTTP server with the database and JWT configuration.
 	e := api.NewEcho(repository, jwtConfig)
 
+	// Get the application port from the environment configuration.
 	appPort := fmt.Sprintf(":%s", utils.GetConfig(constant.PORT))
 
+	// Start the HTTP server and log any startup error.
 	if err := e.Start(appPort); err != nil {
 		e.Logger.Error("failed to start server", "error", err)
 	}
