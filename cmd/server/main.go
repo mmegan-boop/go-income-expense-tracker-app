@@ -1,13 +1,15 @@
 package main
 
 import (
+	"fmt"
+	"go-income-expense-tracker-app/internal/api"
+	"go-income-expense-tracker-app/internal/config"
 	"go-income-expense-tracker-app/internal/constant"
 	"go-income-expense-tracker-app/internal/db"
 	"go-income-expense-tracker-app/internal/utils"
 )
 
 func main() {
-	// fmt.Println("Hello, Go!")
 	dbConfig := db.DBConfig{
 		Username: utils.GetConfig(constant.DB_USERNAME),
 		Password: utils.GetConfig(constant.DB_PASSWORD),
@@ -18,14 +20,16 @@ func main() {
 
 	var (
 		repository = dbConfig.InitDB()
-		// e          = api.NewEcho(repository, jwtConfig)
+		jwtConfig  = config.LoadJWTConfig()
 	)
 
-	db.MigrateDB(repository)
+	// db.MigrateDB(repository)
 
-	// appPort := fmt.Sprintf(":%s", utils.GetConfig(constant.PORT))
+	e := api.NewEcho(repository, jwtConfig)
 
-	// if err := e.Start(appPort); err != nil {
-	// 	e.Logger.Error("failed to start server", "error", err)
-	// }
+	appPort := fmt.Sprintf(":%s", utils.GetConfig(constant.PORT))
+
+	if err := e.Start(appPort); err != nil {
+		e.Logger.Error("failed to start server", "error", err)
+	}
 }
