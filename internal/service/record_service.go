@@ -9,9 +9,9 @@ import (
 )
 
 var (
-	ErrRecordNotFound   = errors.New("record not found")
-	ErrRecordForbidden  = errors.New("record does not belong to this user")
-	ErrInvalidRecord    = errors.New("invalid record type or amount")
+	ErrRecordNotFound  = errors.New("record not found")
+	ErrRecordForbidden = errors.New("record does not belong to this user")
+	ErrInvalidRecord   = errors.New("invalid record type or amount")
 )
 
 type RecordService interface {
@@ -23,16 +23,21 @@ type RecordService interface {
 }
 
 type recordService struct {
-	recordRepository repository.RecordRepository
+	recordRepository   repository.RecordRepository
+	categoryRepository repository.CategoryRepository
 }
 
-func NewRecordService(recordRepository repository.RecordRepository) RecordService {
-	return &recordService{recordRepository: recordRepository}
+func NewRecordService(recordRepository repository.RecordRepository, categoryRepository repository.CategoryRepository) RecordService {
+	return &recordService{recordRepository: recordRepository, categoryRepository: categoryRepository}
 }
 
 func (s *recordService) Create(userID uint, req dto.RecordRequest) (*model.Record, error) {
 	if !isValidRecordType(req.RecordType) || req.Amount <= 0 {
 		return nil, ErrInvalidRecord
+	}
+
+	if _, err := s.categoryRepository.FindByID(int(req.CategoryID)); err != nil {
+		return nil, ErrCategoryNotFound
 	}
 
 	record := &model.Record{
@@ -82,6 +87,10 @@ func (s *recordService) Update(userID uint, id int, req dto.RecordRequest) (*mod
 		return nil, ErrInvalidRecord
 	}
 
+	if _, err := s.categoryRepository.FindByID(int(req.CategoryID)); err != nil {
+		return nil, ErrCategoryNotFound
+	}
+
 	record.CategoryID = req.CategoryID
 	record.RecordType = model.RecordType(req.RecordType)
 	record.Amount = req.Amount
@@ -118,7 +127,7 @@ func parseRecordDate(value string) time.Time {
 		return time.Now()
 	}
 
-	for _, layout := range []string{"2006-01-02", time.RFC3339} {
+	for _, layout := range []string{"02-01-2006", time.RFC3339} {
 		if t, err := time.Parse(layout, value); err == nil {
 			return t
 		}

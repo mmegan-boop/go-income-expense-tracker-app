@@ -34,7 +34,7 @@ func NewEcho(db *gorm.DB, jwtConfig appmiddleware.JWTConfig) *echo.Echo {
 	authService := service.NewAuthService(authRepository, jwtConfig)
 	userService := service.NewUserService(userRepository)
 	categoryService := service.NewCategoryService(categoryRepository)
-	recordService := service.NewRecordService(recordRepository)
+	recordService := service.NewRecordService(recordRepository, categoryRepository)
 
 	// Initialize controllers responsible for handling HTTP requests.
 	authController := controller.NewAuthController(authService)

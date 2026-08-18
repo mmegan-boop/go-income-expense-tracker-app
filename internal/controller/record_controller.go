@@ -54,6 +54,13 @@ func (c *RecordController) Create(ctx *echo.Context) error {
 			})
 		}
 
+		if errors.Is(err, service.ErrCategoryNotFound) {
+			return ctx.JSON(http.StatusBadRequest, dto.Response[any]{
+				Status:  http.StatusBadRequest,
+				Message: err.Error(),
+			})
+		}
+
 		return ctx.JSON(http.StatusInternalServerError, dto.Response[any]{
 			Status:  http.StatusInternalServerError,
 			Message: "failed to create record",
@@ -183,6 +190,11 @@ func (c *RecordController) Update(ctx *echo.Context) error {
 				Message: err.Error(),
 			})
 		case errors.Is(err, service.ErrInvalidRecord):
+			return ctx.JSON(http.StatusBadRequest, dto.Response[any]{
+				Status:  http.StatusBadRequest,
+				Message: err.Error(),
+			})
+		case errors.Is(err, service.ErrCategoryNotFound):
 			return ctx.JSON(http.StatusBadRequest, dto.Response[any]{
 				Status:  http.StatusBadRequest,
 				Message: err.Error(),
