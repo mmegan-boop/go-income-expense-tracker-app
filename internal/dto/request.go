@@ -28,3 +28,8 @@ type RecordRequest struct {
 	Description string  `json:"description" validate:"max=500"`
 	RecordDate  string  `json:"record_date"`
 }
+
+type ExportReportRequest struct {
+	StartDate string `json:"start_date"`
+	EndDate   string `json:"end_date"`
+}

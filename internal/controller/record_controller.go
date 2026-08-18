@@ -2,6 +2,7 @@ package controller
 
 import (
 	"errors"
+	"fmt"
 	"go-income-expense-tracker-app/internal/dto"
 	"go-income-expense-tracker-app/internal/middleware"
 	"go-income-expense-tracker-app/internal/model"
@@ -255,4 +256,52 @@ func (c *RecordController) Delete(ctx *echo.Context) error {
 		Status:  http.StatusOK,
 		Message: "record deleted successfully",
 	})
+}
+
+func (c *RecordController) ExportReport(ctx *echo.Context) error {
+	userID, err := middleware.GetUserID(ctx.Request().Context())
+	if err != nil {
+		return ctx.JSON(http.StatusUnauthorized, dto.Response[any]{
+			Status:  http.StatusUnauthorized,
+			Message: "invalid token",
+		})
+	}
+
+	startDate := ctx.QueryParam("start_date")
+	endDate := ctx.QueryParam("end_date")
+
+	if startDate == "" || endDate == "" {
+		return ctx.JSON(http.StatusBadRequest, dto.Response[any]{
+			Status:  http.StatusBadRequest,
+			Message: "start_date and end_date are required",
+		})
+	}
+
+	report, err := c.recordService.ExportReport(uint(userID), dto.ExportReportRequest{
+		StartDate: startDate,
+		EndDate:   endDate,
+	})
+
+	if err != nil {
+		if errors.Is(err, service.ErrInvalidRecord) {
+			return ctx.JSON(http.StatusBadRequest, dto.Response[any]{
+				Status:  http.StatusBadRequest,
+				Message: "invalid date format, use DD-MM-YYYY",
+			})
+		}
+
+		return ctx.JSON(http.StatusInternalServerError, dto.Response[any]{
+			Status:  http.StatusInternalServerError,
+			Message: "failed to generate report",
+		})
+	}
+
+	fileName := fmt.Sprintf(
+		"income-expense-report_%s_to_%s.xlsx",
+		startDate,
+		endDate,
+	)
+	ctx.Response().Header().Set("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+	ctx.Response().Header().Set("Content-Disposition", fmt.Sprintf(`attachment; filename="%s"`, fileName))
+	return ctx.Blob(http.StatusOK, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", report)
 }

@@ -1,11 +1,15 @@
 package service
 
 import (
+	"bytes"
 	"errors"
+	"fmt"
 	"go-income-expense-tracker-app/internal/dto"
 	"go-income-expense-tracker-app/internal/model"
 	"go-income-expense-tracker-app/internal/repository"
 	"time"
+
+	"github.com/xuri/excelize/v2"
 )
 
 var (
@@ -20,6 +24,7 @@ type RecordService interface {
 	GetAllByUser(userID uint) ([]model.Record, error)
 	Update(userID uint, id int, req dto.RecordRequest) (*model.Record, error)
 	Delete(userID uint, id int) error
+	ExportReport(userID uint, req dto.ExportReportRequest) ([]byte, error)
 }
 
 type recordService struct {
@@ -115,6 +120,61 @@ func (s *recordService) Delete(userID uint, id int) error {
 	}
 
 	return s.recordRepository.Delete(id)
+}
+
+func (s *recordService) ExportReport(userID uint, req dto.ExportReportRequest) ([]byte, error) {
+	startDate, err := time.Parse("02-01-2006", req.StartDate)
+	if err != nil {
+		return nil, ErrInvalidRecord
+	}
+
+	endDate, err := time.Parse("02-01-2006 15:04:05", req.EndDate+" 23:59:59")
+	if err != nil {
+		return nil, ErrInvalidRecord
+	}
+
+	records, err := s.recordRepository.FindAllByUserIDAndDateRange(userID, startDate, endDate)
+	if err != nil {
+		return nil, ErrRecordNotFound
+	}
+	fmt.Println("isi records?", records)
+	f := excelize.NewFile()
+	defer f.Close()
+	f.SetSheetName("Sheet1", "Records")
+	sheet := "Records"
+	// Set column widths
+	f.SetColWidth(sheet, "A", "A", 20) // Date
+	f.SetColWidth(sheet, "B", "B", 20) // Type
+	f.SetColWidth(sheet, "C", "C", 20) // Category
+	f.SetColWidth(sheet, "D", "D", 20) // Amount
+	f.SetColWidth(sheet, "E", "E", 30) // Description
+	f.SetCellValue(sheet, "A1", "Date")
+	f.SetCellValue(sheet, "B1", "Type")
+	f.SetCellValue(sheet, "C1", "Category")
+	f.SetCellValue(sheet, "D1", "Amount")
+	f.SetCellValue(sheet, "E1", "Description")
+
+	for i, record := range records {
+		row := i + 2
+
+		categoryName := ""
+		if category, err := s.categoryRepository.FindByID(int(record.CategoryID)); err == nil {
+			categoryName = category.Name
+		}
+
+		f.SetCellValue(sheet, fmt.Sprintf("A%d", row), record.RecordDate.Format("02-01-2006"))
+		f.SetCellValue(sheet, fmt.Sprintf("B%d", row), string(record.RecordType))
+		f.SetCellValue(sheet, fmt.Sprintf("C%d", row), categoryName)
+		f.SetCellValue(sheet, fmt.Sprintf("D%d", row), record.Amount)
+		f.SetCellValue(sheet, fmt.Sprintf("E%d", row), record.Description)
+	}
+
+	var buf bytes.Buffer
+	if err := f.Write(&buf); err != nil {
+		return nil, err
+	}
+
+	return buf.Bytes(), nil
 }
 
 func isValidRecordType(recordType string) bool {

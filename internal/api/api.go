@@ -75,6 +75,7 @@ func NewEcho(db *gorm.DB, jwtConfig appmiddleware.JWTConfig) *echo.Echo {
 	protectedGroup.GET("/records/:id", recordController.GetByID)
 	protectedGroup.PUT("/records/:id", recordController.Update)
 	protectedGroup.DELETE("/records/:id", recordController.Delete)
+	protectedGroup.GET("/records/report", recordController.ExportReport)
 
 	return e
 }
