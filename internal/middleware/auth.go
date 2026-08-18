@@ -3,6 +3,7 @@ package middleware
 import (
 	"context"
 	"errors"
+	"fmt"
 	"go-income-expense-tracker-app/internal/model"
 	"net/http"
 	"time"
@@ -58,8 +59,10 @@ func (jwtCfg *JWTConfig) GenerateToken(userID int, role model.Role) (string, err
 	return token, nil
 }
 
+// Retrieves the authenticated user's JWT claims
 func GetUser(ctx context.Context) (*JWTCustomClaims, error) {
 	user, ok := ctx.Value(userContextKey).(*jwt.Token)
+	fmt.Println("get user user", user, "isi userContextKey", userContextKey)
 	if !ok || user == nil {
 		return nil, errors.New("invalid token")
 	}
@@ -72,6 +75,7 @@ func GetUser(ctx context.Context) (*JWTCustomClaims, error) {
 	return claims, nil
 }
 
+// Retrieves the authenticated user's ID from the JWT
 func GetUserID(ctx context.Context) (int, error) {
 	claim, err := GetUser(ctx)
 
@@ -82,27 +86,22 @@ func GetUserID(ctx context.Context) (int, error) {
 	return claim.ID, nil
 }
 
+// Middleware that validates/accesses the authenticated JWT and makes it available to downstream handlers
 func VerifyToken(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c *echo.Context) error {
+		// Retrieve JWT token from the Echo context using the "user" key
 		user := c.Get("user").(*jwt.Token)
-
+		fmt.Println("isi user di verifyToken", user)
 		if user == nil {
 			return c.JSON(http.StatusUnauthorized, map[string]string{
 				"message": "invalid token",
 			})
 		}
 
+		// After successful authentication, downstream handlers can access:
+		// - c.Request().Context() to retrieve the JWT through GetUser or GetUserID
 		ctx := context.WithValue(c.Request().Context(), userContextKey, user)
 		c.SetRequest(c.Request().WithContext(ctx))
-
-		userData, err := GetUser(ctx)
-		if userData == nil || err != nil {
-			return c.JSON(http.StatusUnauthorized, map[string]string{
-				"message": "invalid token",
-			})
-		}
-
-		c.Set("userData", userData)
 
 		return next(c)
 	}

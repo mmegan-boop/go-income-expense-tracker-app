@@ -50,7 +50,8 @@ func NewEcho(db *gorm.DB, jwtConfig appmiddleware.JWTConfig) *echo.Echo {
 	apiGroup.POST("/auth/login", authController.Login)
 
 	// Create a protected route group that requires JWT authentication.
-	protectedGroup := apiGroup.Group("", echojwt.WithConfig(jwtConfig.Init()))
+	// Validate token and stores it in Echo's context
+	protectedGroup := apiGroup.Group("", echojwt.WithConfig(jwtConfig.Init()), appmiddleware.VerifyToken)
 
 	// Register authentication endpoints.
 	protectedGroup.POST("/auth/logout", authController.Logout)
