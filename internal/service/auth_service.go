@@ -10,9 +10,9 @@ import (
 )
 
 var (
-	ErrEmailExists         = errors.New("email already registered")
-	ErrInvalidCredentials  = errors.New("invalid email or password")
-	ErrPasswordTooShort    = errors.New("password must be at least 6 characters")
+	ErrEmailExists        = errors.New("email already registered")
+	ErrInvalidCredentials = errors.New("invalid email or password")
+	ErrPasswordTooShort   = errors.New("password must be at least 6 characters")
 )
 
 type AuthService interface {

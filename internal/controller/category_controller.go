@@ -20,8 +20,10 @@ func NewCategoryController(categoryService service.CategoryService) *CategoryCon
 }
 
 func (c *CategoryController) Create(ctx *echo.Context) error {
+	// Create a request DTO
 	var req dto.CategoryRequest
 
+	// Bind the request body
 	if err := ctx.Bind(&req); err != nil {
 		return ctx.JSON(http.StatusBadRequest, dto.Response[any]{
 			Status:  http.StatusBadRequest,
@@ -29,6 +31,7 @@ func (c *CategoryController) Create(ctx *echo.Context) error {
 		})
 	}
 
+	// Validate the request
 	if err := ctx.Validate(&req); err != nil {
 		return ctx.JSON(http.StatusBadRequest, dto.Response[any]{
 			Status:  http.StatusBadRequest,
@@ -36,8 +39,19 @@ func (c *CategoryController) Create(ctx *echo.Context) error {
 		})
 	}
 
+	// Call the service
 	category, err := c.categoryService.Create(req)
+
 	if err != nil {
+		// Check for a duplicate category
+		if errors.Is(err, service.ErrCategoryNameExists) {
+			return ctx.JSON(http.StatusConflict, dto.Response[any]{
+				Status:  http.StatusConflict,
+				Message: err.Error(),
+			})
+		}
+
+		// Handle unexpected errors
 		return ctx.JSON(http.StatusInternalServerError, dto.Response[any]{
 			Status:  http.StatusInternalServerError,
 			Message: "failed to create category",

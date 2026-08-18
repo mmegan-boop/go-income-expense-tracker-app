@@ -7,8 +7,10 @@ import (
 	"go-income-expense-tracker-app/internal/repository"
 )
 
+// Category errors contains predefined errors returned by category services.
 var (
-	ErrCategoryNotFound = errors.New("category not found")
+	ErrCategoryNotFound   = errors.New("category not found")
+	ErrCategoryNameExists = errors.New("category name already exists")
 )
 
 type CategoryService interface {
@@ -28,10 +30,17 @@ func NewCategoryService(categoryRepository repository.CategoryRepository) Catego
 }
 
 func (s *categoryService) Create(req dto.CategoryRequest) (*model.Category, error) {
+	// Check whether a category with the same name already exists.
+	if _, err := s.categoryRepository.FindByName(req.Name); err == nil {
+		return nil, ErrCategoryNameExists
+	}
+
+	// Create a category model from the request data.
 	category := &model.Category{
 		Name: req.Name,
 	}
 
+	// Persist the new category to the database.
 	if err := s.categoryRepository.Create(category); err != nil {
 		return nil, err
 	}

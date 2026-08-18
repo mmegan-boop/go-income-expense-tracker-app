@@ -15,6 +15,7 @@ func LoadJWTConfig() middleware.JWTConfig {
 		secretKey = defaultJWTSecretKey
 	}
 
+	// Set the default JWT expiration duration to 60 minutes.
 	expiresDuration := 60
 	if value := utils.GetConfig(constant.JWT_EXPIRE_DURATION); value != "" {
 		if parsed, err := strconv.Atoi(value); err == nil && parsed > 0 {

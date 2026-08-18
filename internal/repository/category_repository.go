@@ -9,6 +9,7 @@ import (
 type CategoryRepository interface {
 	Create(category *model.Category) error
 	FindByID(id int) (*model.Category, error)
+	FindByName(name string) (*model.Category, error)
 	FindAll() ([]model.Category, error)
 	Update(category *model.Category) error
 	Delete(id int) error
@@ -30,6 +31,16 @@ func (r *categoryRepository) FindByID(id int) (*model.Category, error) {
 	var category model.Category
 
 	if err := r.db.First(&category, id).Error; err != nil {
+		return nil, err
+	}
+
+	return &category, nil
+}
+
+func (r *categoryRepository) FindByName(name string) (*model.Category, error) {
+	var category model.Category
+
+	if err := r.db.Where("name = ?", name).First(&category).Error; err != nil {
 		return nil, err
 	}
 
