@@ -146,6 +146,14 @@ func (c *CategoryController) Update(ctx *echo.Context) error {
 			})
 		}
 
+		// Check for a duplicate category
+		if errors.Is(err, service.ErrCategoryNameExists) {
+			return ctx.JSON(http.StatusConflict, dto.Response[any]{
+				Status:  http.StatusConflict,
+				Message: err.Error(),
+			})
+		}
+
 		return ctx.JSON(http.StatusInternalServerError, dto.Response[any]{
 			Status:  http.StatusInternalServerError,
 			Message: "failed to update category",

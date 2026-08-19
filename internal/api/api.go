@@ -2,8 +2,8 @@ package api
 
 import (
 	"go-income-expense-tracker-app/internal/controller"
-	"go-income-expense-tracker-app/internal/model"
 	appmiddleware "go-income-expense-tracker-app/internal/middleware"
+	"go-income-expense-tracker-app/internal/model"
 	"go-income-expense-tracker-app/internal/repository"
 	"go-income-expense-tracker-app/internal/service"
 	appvalidator "go-income-expense-tracker-app/internal/validator"
@@ -33,7 +33,7 @@ func NewEcho(db *gorm.DB, jwtConfig appmiddleware.JWTConfig) *echo.Echo {
 
 	// Initialize services containing application's business logic.
 	authService := service.NewAuthService(authRepository, jwtConfig)
-	userService := service.NewUserService(userRepository)
+	userService := service.NewUserService(userRepository, authRepository)
 	categoryService := service.NewCategoryService(categoryRepository)
 	recordService := service.NewRecordService(recordRepository, categoryRepository)
 
@@ -64,11 +64,11 @@ func NewEcho(db *gorm.DB, jwtConfig appmiddleware.JWTConfig) *echo.Echo {
 	protectedGroup.DELETE("/users/:id", userController.Delete, appmiddleware.RequireRole(model.RoleAdmin))
 
 	// Register categories endpoints.
-	protectedGroup.POST("/categories", categoryController.Create)
+	protectedGroup.POST("/categories", categoryController.Create, appmiddleware.RequireRole(model.RoleAdmin))
 	protectedGroup.GET("/categories", categoryController.GetAll)
 	protectedGroup.GET("/categories/:id", categoryController.GetByID)
-	protectedGroup.PUT("/categories/:id", categoryController.Update)
-	protectedGroup.DELETE("/categories/:id", categoryController.Delete)
+	protectedGroup.PUT("/categories/:id", categoryController.Update, appmiddleware.RequireRole(model.RoleAdmin))
+	protectedGroup.DELETE("/categories/:id", categoryController.Delete, appmiddleware.RequireRole(model.RoleAdmin))
 
 	// Register financial records endpoints.
 	protectedGroup.POST("/records", recordController.Create)

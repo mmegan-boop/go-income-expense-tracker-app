@@ -67,6 +67,11 @@ func (s *categoryService) Update(id int, req dto.CategoryRequest) (*model.Catego
 		return nil, ErrCategoryNotFound
 	}
 
+	// Check whether a category with the same name already exists.
+	if existing, err := s.categoryRepository.FindByName(req.Name); err == nil && existing.ID != uint(id) {
+		return nil, ErrCategoryNameExists
+	}
+
 	category.Name = req.Name
 
 	if err := s.categoryRepository.Update(category); err != nil {

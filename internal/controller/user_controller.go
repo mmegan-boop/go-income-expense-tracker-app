@@ -76,11 +76,18 @@ func (c *UserController) UpdateProfile(ctx *echo.Context) error {
 		})
 	}
 
-	user, err := c.userService.Update(userID, req)
+	user, err := c.userService.UpdateProfile(userID, req)
 	if err != nil {
 		if errors.Is(err, service.ErrUserNotFound) {
 			return ctx.JSON(http.StatusNotFound, dto.Response[any]{
 				Status:  http.StatusNotFound,
+				Message: err.Error(),
+			})
+		}
+
+		if errors.Is(err, service.ErrEmailExists) {
+			return ctx.JSON(http.StatusConflict, dto.Response[any]{
+				Status:  http.StatusConflict,
 				Message: err.Error(),
 			})
 		}
