@@ -33,3 +33,7 @@ type ExportReportRequest struct {
 	StartDate string `json:"start_date"`
 	EndDate   string `json:"end_date"`
 }
+
+type SummaryRequest struct {
+	Month string `json:"month" validate:"required"` // MM-YYYY
+}

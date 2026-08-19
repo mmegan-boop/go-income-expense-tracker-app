@@ -2,6 +2,7 @@ package api
 
 import (
 	"go-income-expense-tracker-app/internal/controller"
+	"go-income-expense-tracker-app/internal/model"
 	appmiddleware "go-income-expense-tracker-app/internal/middleware"
 	"go-income-expense-tracker-app/internal/repository"
 	"go-income-expense-tracker-app/internal/service"
@@ -59,8 +60,8 @@ func NewEcho(db *gorm.DB, jwtConfig appmiddleware.JWTConfig) *echo.Echo {
 	// Register user endpoints.
 	protectedGroup.GET("/users/me", userController.GetProfile)
 	protectedGroup.PUT("/users/me", userController.UpdateProfile)
-	protectedGroup.GET("/users", userController.GetAll)
-	protectedGroup.DELETE("/users/:id", userController.Delete)
+	protectedGroup.GET("/users", userController.GetAll, appmiddleware.RequireRole(model.RoleAdmin))
+	protectedGroup.DELETE("/users/:id", userController.Delete, appmiddleware.RequireRole(model.RoleAdmin))
 
 	// Register categories endpoints.
 	protectedGroup.POST("/categories", categoryController.Create)
@@ -76,6 +77,7 @@ func NewEcho(db *gorm.DB, jwtConfig appmiddleware.JWTConfig) *echo.Echo {
 	protectedGroup.PUT("/records/:id", recordController.Update)
 	protectedGroup.DELETE("/records/:id", recordController.Delete)
 	protectedGroup.GET("/records/report", recordController.ExportReport)
+	protectedGroup.GET("/records/summary", recordController.GetSummary)
 
 	return e
 }

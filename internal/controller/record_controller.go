@@ -305,3 +305,42 @@ func (c *RecordController) ExportReport(ctx *echo.Context) error {
 	ctx.Response().Header().Set("Content-Disposition", fmt.Sprintf(`attachment; filename="%s"`, fileName))
 	return ctx.Blob(http.StatusOK, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", report)
 }
+
+func (c *RecordController) GetSummary(ctx *echo.Context) error {
+	userID, err := middleware.GetUserID(ctx.Request().Context())
+	if err != nil {
+		return ctx.JSON(http.StatusUnauthorized, dto.Response[any]{
+			Status:  http.StatusUnauthorized,
+			Message: "invalid token",
+		})
+	}
+
+	month := ctx.QueryParam("month")
+	if month == "" {
+		return ctx.JSON(http.StatusBadRequest, dto.Response[any]{
+			Status:  http.StatusBadRequest,
+			Message: "month is required",
+		})
+	}
+
+	summary, err := c.recordService.GetSummary(uint(userID), dto.SummaryRequest{Month: month})
+	if err != nil {
+		if errors.Is(err, service.ErrInvalidRecord) {
+			return ctx.JSON(http.StatusBadRequest, dto.Response[any]{
+				Status:  http.StatusBadRequest,
+				Message: "invalid month format, use MM-YYYY",
+			})
+		}
+
+		return ctx.JSON(http.StatusInternalServerError, dto.Response[any]{
+			Status:  http.StatusInternalServerError,
+			Message: "failed to get summary",
+		})
+	}
+
+	return ctx.JSON(http.StatusOK, dto.Response[*dto.SummaryResponse]{
+		Status:  http.StatusOK,
+		Message: "summary retrieved successfully",
+		Data:    summary,
+	})
+}

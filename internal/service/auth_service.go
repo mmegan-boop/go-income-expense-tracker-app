@@ -7,12 +7,15 @@ import (
 	"go-income-expense-tracker-app/internal/model"
 	"go-income-expense-tracker-app/internal/repository"
 	"go-income-expense-tracker-app/internal/utils"
+
+	"github.com/go-playground/validator/v10"
 )
 
 var (
 	ErrEmailExists        = errors.New("email already registered")
 	ErrInvalidCredentials = errors.New("invalid email or password")
 	ErrPasswordTooShort   = errors.New("password must be at least 6 characters")
+	ErrInvalidEmailFormat = errors.New("invalid email format")
 )
 
 type AuthService interface {
@@ -30,6 +33,11 @@ func NewAuthService(authRepository repository.AuthRepository, jwtConfig middlewa
 }
 
 func (s *authService) Register(req dto.RegisterRequest) (*model.User, error) {
+	v := validator.New()
+	if err := v.Var(req.Email, "email"); err != nil {
+		return nil, ErrInvalidEmailFormat
+	}
+
 	if len(req.Password) < 6 {
 		return nil, ErrPasswordTooShort
 	}

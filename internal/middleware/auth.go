@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"go-income-expense-tracker-app/internal/dto"
 	"go-income-expense-tracker-app/internal/model"
 	"net/http"
 	"time"
@@ -84,6 +85,32 @@ func GetUserID(ctx context.Context) (int, error) {
 	}
 
 	return claim.ID, nil
+}
+
+// RequireRole returns middleware that restricts access to users with one of the specified roles.
+func RequireRole(allowedRoles ...model.Role) echo.MiddlewareFunc {
+	return func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(c *echo.Context) error {
+			claims, err := GetUser(c.Request().Context())
+			if err != nil {
+				return c.JSON(http.StatusUnauthorized, dto.Response[string]{
+					Status:  http.StatusUnauthorized,
+					Message: "unauthorized",
+				})
+			}
+
+			for _, role := range allowedRoles {
+				if claims.Role == role {
+					return next(c)
+				}
+			}
+
+			return c.JSON(http.StatusForbidden, dto.Response[string]{
+				Status:  http.StatusForbidden,
+				Message: "forbidden: insufficient permissions",
+			})
+		}
+	}
 }
 
 // Middleware that validates/accesses the authenticated JWT and makes it available to downstream handlers

@@ -7,6 +7,7 @@ import (
 	"go-income-expense-tracker-app/internal/dto"
 	"go-income-expense-tracker-app/internal/model"
 	"go-income-expense-tracker-app/internal/repository"
+	"math"
 	"time"
 
 	"github.com/xuri/excelize/v2"
@@ -25,6 +26,7 @@ type RecordService interface {
 	Update(userID uint, id int, req dto.RecordRequest) (*model.Record, error)
 	Delete(userID uint, id int) error
 	ExportReport(userID uint, req dto.ExportReportRequest) ([]byte, error)
+	GetSummary(userID uint, req dto.SummaryRequest) (*dto.SummaryResponse, error)
 }
 
 type recordService struct {
@@ -175,6 +177,70 @@ func (s *recordService) ExportReport(userID uint, req dto.ExportReportRequest) (
 	}
 
 	return buf.Bytes(), nil
+}
+
+func (s *recordService) GetSummary(userID uint, req dto.SummaryRequest) (*dto.SummaryResponse, error) {
+	startDate, err := time.Parse("01-2006", req.Month)
+	if err != nil {
+		return nil, ErrInvalidRecord
+	}
+
+	endDate := startDate.AddDate(0, 1, -1).Add(23*time.Hour + 59*time.Minute + 59*time.Second)
+
+	records, err := s.recordRepository.FindAllByUserIDAndDateRange(userID, startDate, endDate)
+	if err != nil {
+		return nil, ErrRecordNotFound
+	}
+
+	var totalIncome float64
+	var totalExpense float64
+	incomeByCategory := make(map[uint]float64)
+	expenseByCategory := make(map[uint]float64)
+
+	for _, record := range records {
+		switch record.RecordType {
+		case model.RecordTypeIncome:
+			totalIncome += record.Amount
+			incomeByCategory[record.CategoryID] += record.Amount
+		case model.RecordTypeExpense:
+			totalExpense += record.Amount
+			expenseByCategory[record.CategoryID] += record.Amount
+		}
+	}
+
+	incomeCategories := buildCategorySummaries(incomeByCategory, totalIncome, s.categoryRepository)
+	expenseCategories := buildCategorySummaries(expenseByCategory, totalExpense, s.categoryRepository)
+
+	return &dto.SummaryResponse{
+		TotalIncome:       totalIncome,
+		TotalExpense:      totalExpense,
+		IncomeCategories:  incomeCategories,
+		ExpenseCategories: expenseCategories,
+	}, nil
+}
+
+func buildCategorySummaries(byCategory map[uint]float64, total float64, categoryRepo repository.CategoryRepository) []dto.CategorySummary {
+	var summaries []dto.CategorySummary
+
+	for categoryID, amount := range byCategory {
+		categoryName := ""
+		if category, err := categoryRepo.FindByID(int(categoryID)); err == nil {
+			categoryName = category.Name
+		}
+
+		percentage := 0.0
+		if total > 0 {
+			percentage = math.Round(amount/total*10000) / 100
+		}
+
+		summaries = append(summaries, dto.CategorySummary{
+			CategoryName: categoryName,
+			Amount:       amount,
+			Percentage:   percentage,
+		})
+	}
+
+	return summaries
 }
 
 func isValidRecordType(recordType string) bool {
