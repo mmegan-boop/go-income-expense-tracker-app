@@ -3,8 +3,8 @@ package api
 import (
 	"go-income-expense-tracker-app/internal/controller"
 	appmiddleware "go-income-expense-tracker-app/internal/middleware"
-	"go-income-expense-tracker-app/internal/model"
 	"go-income-expense-tracker-app/internal/repository"
+	"go-income-expense-tracker-app/internal/router"
 	"go-income-expense-tracker-app/internal/service"
 	appvalidator "go-income-expense-tracker-app/internal/validator"
 
@@ -15,7 +15,7 @@ import (
 )
 
 // NewEcho creates and configures the Echo HTTP server,
-// including middleware, repositories, services, controllers, and API routes.
+// including middleware, repositories, services, controllers, and registers API routes via the router package.
 func NewEcho(db *gorm.DB, jwtConfig appmiddleware.JWTConfig) *echo.Echo {
 	e := echo.New()
 
@@ -46,38 +46,15 @@ func NewEcho(db *gorm.DB, jwtConfig appmiddleware.JWTConfig) *echo.Echo {
 	// Create the base API route group.
 	apiGroup := e.Group("/api")
 
-	// Register public authentication endpoints.
-	apiGroup.POST("/auth/register", authController.Register)
-	apiGroup.POST("/auth/login", authController.Login)
-
 	// Create a protected route group that requires JWT authentication.
 	// Validate token and stores it in Echo's context
 	protectedGroup := apiGroup.Group("", echojwt.WithConfig(jwtConfig.Init()), appmiddleware.VerifyToken)
 
-	// Register authentication endpoints.
-	protectedGroup.POST("/auth/logout", authController.Logout)
-
-	// Register user endpoints.
-	protectedGroup.GET("/users/me", userController.GetProfile)
-	protectedGroup.PUT("/users/me", userController.UpdateProfile)
-	protectedGroup.GET("/users", userController.GetAll, appmiddleware.RequireRole(model.RoleAdmin))
-	protectedGroup.DELETE("/users/:id", userController.Delete, appmiddleware.RequireRole(model.RoleAdmin))
-
-	// Register categories endpoints.
-	protectedGroup.POST("/categories", categoryController.Create, appmiddleware.RequireRole(model.RoleAdmin))
-	protectedGroup.GET("/categories", categoryController.GetAll)
-	protectedGroup.GET("/categories/:id", categoryController.GetByID)
-	protectedGroup.PUT("/categories/:id", categoryController.Update, appmiddleware.RequireRole(model.RoleAdmin))
-	protectedGroup.DELETE("/categories/:id", categoryController.Delete, appmiddleware.RequireRole(model.RoleAdmin))
-
-	// Register financial records endpoints.
-	protectedGroup.POST("/records", recordController.Create)
-	protectedGroup.GET("/records", recordController.GetAll)
-	protectedGroup.GET("/records/:id", recordController.GetByID)
-	protectedGroup.PUT("/records/:id", recordController.Update)
-	protectedGroup.DELETE("/records/:id", recordController.Delete)
-	protectedGroup.GET("/records/report", recordController.ExportReport)
-	protectedGroup.GET("/records/summary", recordController.GetSummary)
+	// Register routes for each domain.
+	router.RegisterAuthRoutes(apiGroup, protectedGroup, authController)
+	router.RegisterUserRoutes(protectedGroup, userController)
+	router.RegisterCategoryRoutes(protectedGroup, categoryController)
+	router.RegisterRecordRoutes(protectedGroup, recordController)
 
 	return e
 }
