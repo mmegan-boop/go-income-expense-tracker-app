@@ -1,7 +1,6 @@
 package repository
 
 import (
-	"fmt"
 	"go-income-expense-tracker-app/internal/model"
 	"time"
 
@@ -59,7 +58,6 @@ func (r *recordRepository) Delete(id int) error {
 
 func (r *recordRepository) FindAllByUserIDAndDateRange(userID uint, startDate time.Time, endDate time.Time) ([]model.Record, error) {
 	var records []model.Record
-	fmt.Println("isi userID", userID, "isi startDate", startDate, "isi endDate", endDate)
 	query := r.db.
 		Where("user_id = ? AND record_date >= ? AND record_date <= ?", userID, startDate, endDate).
 		// Where("user_id = ?", userID).

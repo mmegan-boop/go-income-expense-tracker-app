@@ -139,7 +139,6 @@ func (s *recordService) ExportReport(userID uint, req dto.ExportReportRequest) (
 	if err != nil {
 		return nil, ErrRecordNotFound
 	}
-	fmt.Println("isi records?", records)
 	f := excelize.NewFile()
 	defer f.Close()
 	f.SetSheetName("Sheet1", "Records")

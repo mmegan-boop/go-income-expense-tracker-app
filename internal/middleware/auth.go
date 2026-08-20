@@ -3,7 +3,6 @@ package middleware
 import (
 	"context"
 	"errors"
-	"fmt"
 	"go-income-expense-tracker-app/internal/dto"
 	"go-income-expense-tracker-app/internal/model"
 	"net/http"
@@ -63,7 +62,6 @@ func (jwtCfg *JWTConfig) GenerateToken(userID int, role model.Role) (string, err
 // Retrieves the authenticated user's JWT claims
 func GetUser(ctx context.Context) (*JWTCustomClaims, error) {
 	user, ok := ctx.Value(userContextKey).(*jwt.Token)
-	fmt.Println("get user user", user, "isi userContextKey", userContextKey)
 	if !ok || user == nil {
 		return nil, errors.New("invalid token")
 	}
@@ -118,7 +116,6 @@ func VerifyToken(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c *echo.Context) error {
 		// Retrieve JWT token from the Echo context using the "user" key
 		user := c.Get("user").(*jwt.Token)
-		fmt.Println("isi user di verifyToken", user)
 		if user == nil {
 			return c.JSON(http.StatusUnauthorized, map[string]string{
 				"message": "invalid token",
