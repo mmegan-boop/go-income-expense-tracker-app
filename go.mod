@@ -24,6 +24,8 @@ require (
 	github.com/bep/golibsass v1.2.0 // indirect
 	github.com/bits-and-blooms/bitset v1.24.5 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
+	github.com/cloudinary/cloudinary-go/v2 v2.16.0 // indirect
+	github.com/creasty/defaults v1.7.0 // indirect
 	github.com/fatih/color v1.18.0 // indirect
 	github.com/fsnotify/fsnotify v1.9.0 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.13 // indirect
@@ -33,6 +35,8 @@ require (
 	github.com/gobwas/glob v0.2.3 // indirect
 	github.com/gohugoio/hashstructure v0.6.0 // indirect
 	github.com/gohugoio/hugo v0.164.0 // indirect
+	github.com/google/uuid v1.6.0 // indirect
+	github.com/gorilla/schema v1.4.1 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20240606120523-5a60cdf6a761 // indirect
 	github.com/jackc/pgx/v5 v5.10.0 // indirect

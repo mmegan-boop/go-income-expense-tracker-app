@@ -454,11 +454,11 @@ func TestRecordController_ExportReport(t *testing.T) {
 		mockRec := new(MockRecordService)
 		ctrl := controller.NewRecordController(mockRec)
 
-		xlsxBytes := []byte("fake-xlsx-data")
+		fakeURL := "https://res.cloudinary.com/demo/raw/upload/v1/report.xlsx"
 		mockRec.On("ExportReport", uint(1), dto.ExportReportRequest{
 			StartDate: "01-01-2026",
 			EndDate:   "31-01-2026",
-		}).Return(xlsxBytes, nil)
+		}).Return(fakeURL, nil)
 
 		req := createRequestWithQuery(http.MethodGet, "/api/records/report", map[string]string{
 			"start_date": "01-01-2026",
@@ -469,9 +469,7 @@ func TestRecordController_ExportReport(t *testing.T) {
 		err := ctrl.ExportReport(ctx)
 		assert.NoError(t, err)
 		assert.Equal(t, http.StatusOK, rec.Code)
-		assert.Equal(t, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-			rec.Header().Get("Content-Type"))
-		assert.Contains(t, rec.Header().Get("Content-Disposition"), "income-expense-report")
+		assert.Contains(t, rec.Body.String(), fakeURL)
 	})
 
 	t.Run("missing start_date", func(t *testing.T) {
@@ -514,7 +512,7 @@ func TestRecordController_ExportReport(t *testing.T) {
 		mockRec.On("ExportReport", uint(1), dto.ExportReportRequest{
 			StartDate: "bad-date",
 			EndDate:   "31-01-2026",
-		}).Return([]byte{}, service.ErrInvalidRecord)
+		}).Return("", service.ErrInvalidRecord)
 
 		req := createRequestWithQuery(http.MethodGet, "/api/records/report", map[string]string{
 			"start_date": "bad-date",
@@ -536,7 +534,7 @@ func TestRecordController_ExportReport(t *testing.T) {
 		mockRec.On("ExportReport", uint(1), dto.ExportReportRequest{
 			StartDate: "01-01-2026",
 			EndDate:   "31-01-2026",
-		}).Return([]byte{}, fmt.Errorf("db error"))
+		}).Return("", fmt.Errorf("db error"))
 
 		req := createRequestWithQuery(http.MethodGet, "/api/records/report", map[string]string{
 			"start_date": "01-01-2026",

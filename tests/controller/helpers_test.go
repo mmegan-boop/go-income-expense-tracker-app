@@ -139,9 +139,9 @@ func (m *MockRecordService) Delete(userID uint, id int) error {
 	return args.Error(0)
 }
 
-func (m *MockRecordService) ExportReport(userID uint, req dto.ExportReportRequest) ([]byte, error) {
+func (m *MockRecordService) ExportReport(userID uint, req dto.ExportReportRequest) (string, error) {
 	args := m.Called(userID, req)
-	return args.Get(0).([]byte), args.Error(1)
+	return args.String(0), args.Error(1)
 }
 
 func (m *MockRecordService) GetSummary(userID uint, req dto.SummaryRequest) (*dto.SummaryResponse, error) {

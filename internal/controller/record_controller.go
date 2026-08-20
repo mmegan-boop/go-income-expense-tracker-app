@@ -2,7 +2,6 @@ package controller
 
 import (
 	"errors"
-	"fmt"
 	"go-income-expense-tracker-app/internal/dto"
 	"go-income-expense-tracker-app/internal/middleware"
 	"go-income-expense-tracker-app/internal/model"
@@ -277,7 +276,7 @@ func (c *RecordController) ExportReport(ctx *echo.Context) error {
 		})
 	}
 
-	report, err := c.recordService.ExportReport(uint(userID), dto.ExportReportRequest{
+	url, err := c.recordService.ExportReport(uint(userID), dto.ExportReportRequest{
 		StartDate: startDate,
 		EndDate:   endDate,
 	})
@@ -296,14 +295,11 @@ func (c *RecordController) ExportReport(ctx *echo.Context) error {
 		})
 	}
 
-	fileName := fmt.Sprintf(
-		"income-expense-report_%s_to_%s.xlsx",
-		startDate,
-		endDate,
-	)
-	ctx.Response().Header().Set("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
-	ctx.Response().Header().Set("Content-Disposition", fmt.Sprintf(`attachment; filename="%s"`, fileName))
-	return ctx.Blob(http.StatusOK, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", report)
+	return ctx.JSON(http.StatusOK, dto.Response[string]{
+		Status:  http.StatusOK,
+		Message: "report exported successfully",
+		Data:    url,
+	})
 }
 
 func (c *RecordController) GetSummary(ctx *echo.Context) error {

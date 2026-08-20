@@ -10,6 +10,7 @@ import (
 	"math"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/xuri/excelize/v2"
 )
 
@@ -25,17 +26,18 @@ type RecordService interface {
 	GetAllByUser(userID uint) ([]model.Record, error)
 	Update(userID uint, id int, req dto.RecordRequest) (*model.Record, error)
 	Delete(userID uint, id int) error
-	ExportReport(userID uint, req dto.ExportReportRequest) ([]byte, error)
+	ExportReport(userID uint, req dto.ExportReportRequest) (string, error)
 	GetSummary(userID uint, req dto.SummaryRequest) (*dto.SummaryResponse, error)
 }
 
 type recordService struct {
 	recordRepository   repository.RecordRepository
 	categoryRepository repository.CategoryRepository
+	cloudinaryService  CloudinaryService
 }
 
-func NewRecordService(recordRepository repository.RecordRepository, categoryRepository repository.CategoryRepository) RecordService {
-	return &recordService{recordRepository: recordRepository, categoryRepository: categoryRepository}
+func NewRecordService(recordRepository repository.RecordRepository, categoryRepository repository.CategoryRepository, cloudinaryService CloudinaryService) RecordService {
+	return &recordService{recordRepository: recordRepository, categoryRepository: categoryRepository, cloudinaryService: cloudinaryService}
 }
 
 func (s *recordService) Create(userID uint, req dto.RecordRequest) (*model.Record, error) {
@@ -124,20 +126,20 @@ func (s *recordService) Delete(userID uint, id int) error {
 	return s.recordRepository.Delete(id)
 }
 
-func (s *recordService) ExportReport(userID uint, req dto.ExportReportRequest) ([]byte, error) {
+func (s *recordService) ExportReport(userID uint, req dto.ExportReportRequest) (string, error) {
 	startDate, err := time.Parse("02-01-2006", req.StartDate)
 	if err != nil {
-		return nil, ErrInvalidRecord
+		return "", ErrInvalidRecord
 	}
 
 	endDate, err := time.Parse("02-01-2006 15:04:05", req.EndDate+" 23:59:59")
 	if err != nil {
-		return nil, ErrInvalidRecord
+		return "", ErrInvalidRecord
 	}
 
 	records, err := s.recordRepository.FindAllByUserIDAndDateRange(userID, startDate, endDate)
 	if err != nil {
-		return nil, ErrRecordNotFound
+		return "", ErrRecordNotFound
 	}
 	f := excelize.NewFile()
 	defer f.Close()
@@ -172,10 +174,21 @@ func (s *recordService) ExportReport(userID uint, req dto.ExportReportRequest) (
 
 	var buf bytes.Buffer
 	if err := f.Write(&buf); err != nil {
-		return nil, err
+		return "", err
 	}
 
-	return buf.Bytes(), nil
+	fileName := fmt.Sprintf(
+		"%s_income-expense-report_%s_to_%s",
+		uuid.New().String(),
+		req.StartDate,
+		req.EndDate,
+	)
+
+	url, err := s.cloudinaryService.UploadRaw(buf.Bytes(), fileName)
+	if err != nil {
+		return "", err
+	}
+	return url, nil
 }
 
 func (s *recordService) GetSummary(userID uint, req dto.SummaryRequest) (*dto.SummaryResponse, error) {
@@ -196,6 +209,7 @@ func (s *recordService) GetSummary(userID uint, req dto.SummaryRequest) (*dto.Su
 	incomeByCategory := make(map[uint]float64)
 	expenseByCategory := make(map[uint]float64)
 
+	// separates totals into totalIncome and totalExpense based on record_type
 	for _, record := range records {
 		switch record.RecordType {
 		case model.RecordTypeIncome:
@@ -221,17 +235,21 @@ func (s *recordService) GetSummary(userID uint, req dto.SummaryRequest) (*dto.Su
 func buildCategorySummaries(byCategory map[uint]float64, total float64, categoryRepo repository.CategoryRepository) []dto.CategorySummary {
 	var summaries []dto.CategorySummary
 
+	// iterates over each categoryID → amount pair
 	for categoryID, amount := range byCategory {
+		// queries the repository to get the name from the ID
 		categoryName := ""
 		if category, err := categoryRepo.FindByID(int(categoryID)); err == nil {
 			categoryName = category.Name
 		}
 
+		// amount / total * 100, rounded to 2 decimal places
 		percentage := 0.0
 		if total > 0 {
 			percentage = math.Round(amount/total*10000) / 100
 		}
 
+		// creates a CategorySummary struct with name, amount, and percentage for each category
 		summaries = append(summaries, dto.CategorySummary{
 			CategoryName: categoryName,
 			Amount:       amount,
@@ -247,6 +265,7 @@ func isValidRecordType(recordType string) bool {
 		model.RecordType(recordType) == model.RecordTypeExpense
 }
 
+// converts a date string into a time.Time value
 func parseRecordDate(value string) time.Time {
 	if value == "" {
 		return time.Now()

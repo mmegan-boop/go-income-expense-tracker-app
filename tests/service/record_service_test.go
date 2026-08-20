@@ -92,10 +92,20 @@ func (m *MockCategoryRepository) Delete(id int) error {
 
 var testCategory = &model.Category{ID: 1, Name: "Food"}
 
+type MockCloudinaryService struct {
+	mock.Mock
+}
+
+func (m *MockCloudinaryService) UploadRaw(data []byte, fileName string) (string, error) {
+	args := m.Called(data, fileName)
+	return args.String(0), args.Error(1)
+}
+
 func newRecordService() (*MockRecordRepository, *MockCategoryRepository, service.RecordService) {
 	mockRecordRepo := new(MockRecordRepository)
 	mockCategoryRepo := new(MockCategoryRepository)
-	svc := service.NewRecordService(mockRecordRepo, mockCategoryRepo)
+	mockCloudinary := new(MockCloudinaryService)
+	svc := service.NewRecordService(mockRecordRepo, mockCategoryRepo, mockCloudinary)
 	return mockRecordRepo, mockCategoryRepo, svc
 }
 
@@ -473,7 +483,7 @@ func TestRecordService_ExportReport(t *testing.T) {
 	janEnd := time.Date(2026, 1, 31, 23, 59, 59, 0, time.UTC)
 
 	t.Run("success with records", func(t *testing.T) {
-		mockRecordRepo, mockCategoryRepo, svc := newRecordService()
+		mockRecordRepo, mockCategoryRepo, _ := newRecordService()
 
 		records := []model.Record{
 			{ID: 1, UserID: 1, CategoryID: 1, RecordType: model.RecordTypeIncome, Amount: 5000, Description: "salary", RecordDate: jan2026},
@@ -481,10 +491,14 @@ func TestRecordService_ExportReport(t *testing.T) {
 		mockRecordRepo.On("FindAllByUserIDAndDateRange", uint(1), jan2026, janEnd).Return(records, nil)
 		mockCategoryRepo.On("FindByID", 1).Return(&model.Category{ID: 1, Name: "Salary"}, nil)
 
-		data, err := svc.ExportReport(1, dto.ExportReportRequest{StartDate: "01-01-2026", EndDate: "31-01-2026"})
+		fakeURL := "https://res.cloudinary.com/demo/raw/upload/v1/report.xlsx"
+		mockCloudinary := new(MockCloudinaryService)
+		mockCloudinary.On("UploadRaw", mock.AnythingOfType("[]uint8"), mock.AnythingOfType("string")).Return(fakeURL, nil)
+
+		svcWithCloudinary := service.NewRecordService(mockRecordRepo, mockCategoryRepo, mockCloudinary)
+		url, err := svcWithCloudinary.ExportReport(1, dto.ExportReportRequest{StartDate: "01-01-2026", EndDate: "31-01-2026"})
 		assert.NoError(t, err)
-		assert.NotEmpty(t, data)
-		assert.Greater(t, len(data), 0)
+		assert.Equal(t, fakeURL, url)
 	})
 
 	t.Run("invalid start date", func(t *testing.T) {
@@ -492,7 +506,7 @@ func TestRecordService_ExportReport(t *testing.T) {
 
 		data, err := svc.ExportReport(1, dto.ExportReportRequest{StartDate: "bad-date", EndDate: "31-01-2026"})
 		assert.ErrorIs(t, err, service.ErrInvalidRecord)
-		assert.Nil(t, data)
+		assert.Empty(t, data)
 	})
 
 	t.Run("invalid end date", func(t *testing.T) {
@@ -500,7 +514,7 @@ func TestRecordService_ExportReport(t *testing.T) {
 
 		data, err := svc.ExportReport(1, dto.ExportReportRequest{StartDate: "01-01-2026", EndDate: "bad-date"})
 		assert.ErrorIs(t, err, service.ErrInvalidRecord)
-		assert.Nil(t, data)
+		assert.Empty(t, data)
 	})
 
 	t.Run("repository error", func(t *testing.T) {
@@ -511,6 +525,6 @@ func TestRecordService_ExportReport(t *testing.T) {
 
 		data, err := svc.ExportReport(1, dto.ExportReportRequest{StartDate: "01-01-2026", EndDate: "31-01-2026"})
 		assert.ErrorIs(t, err, service.ErrRecordNotFound)
-		assert.Nil(t, data)
+		assert.Empty(t, data)
 	})
 }
