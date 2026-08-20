@@ -3,7 +3,7 @@ package dto
 type RegisterRequest struct {
 	Username string `json:"username" form:"username" validate:"required,min=3,max=50"`
 	Email    string `json:"email" form:"email" validate:"required,email"`
-	Password string `json:"password" form:"password" validate:"required,min=6"`
+	Password string `json:"password" form:"password" validate:"required"`
 }
 
 type LoginRequest struct {
