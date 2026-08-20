@@ -312,6 +312,79 @@
               ],
               "cookie": [],
               "body": "{\n    \"status\": 400,\n    \"message\": \"password must be at least 6 characters\"\n}"
+            },
+            {
+              "name": "Invalid Email Format",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n    \"username\": \"test\",\r\n    \"email\": \"test\",\r\n    \"password\": \"Admin123\"\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "https://go-income-expense-tracker-app.vercel.app/api/auth/register",
+                  "protocol": "https",
+                  "host": [
+                    "go-income-expense-tracker-app",
+                    "vercel",
+                    "app"
+                  ],
+                  "path": [
+                    "api",
+                    "auth",
+                    "register"
+                  ]
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": ":status",
+                  "value": 400
+                },
+                {
+                  "key": "cache-control",
+                  "value": "public, max-age=0, must-revalidate"
+                },
+                {
+                  "key": "content-type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "date",
+                  "value": "Thu, 20 Aug 2026 10:41:23 GMT"
+                },
+                {
+                  "key": "server",
+                  "value": "Vercel"
+                },
+                {
+                  "key": "strict-transport-security",
+                  "value": "max-age=63072000; includeSubDomains; preload"
+                },
+                {
+                  "key": "x-vercel-cache",
+                  "value": "MISS"
+                },
+                {
+                  "key": "x-vercel-id",
+                  "value": "sin1::iad1::chlks-1787222483613-0bb6b396da25"
+                },
+                {
+                  "key": "content-length",
+                  "value": "117"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"status\": 400,\n    \"message\": \"Key: 'RegisterRequest.Email' Error:Field validation for 'Email' failed on the 'email' tag\"\n}"
             }
           ]
         },
@@ -549,6 +622,79 @@
               ],
               "cookie": [],
               "body": "{\n    \"status\": 401,\n    \"message\": \"invalid email or password\"\n}"
+            },
+            {
+              "name": "Invalid Email Format",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n    \"email\": \"username admin update\",\r\n    \"password\": \"Admin123\"\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "https://go-income-expense-tracker-app.vercel.app/api/auth/login",
+                  "protocol": "https",
+                  "host": [
+                    "go-income-expense-tracker-app",
+                    "vercel",
+                    "app"
+                  ],
+                  "path": [
+                    "api",
+                    "auth",
+                    "login"
+                  ]
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": ":status",
+                  "value": 400
+                },
+                {
+                  "key": "cache-control",
+                  "value": "public, max-age=0, must-revalidate"
+                },
+                {
+                  "key": "content-type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "date",
+                  "value": "Thu, 20 Aug 2026 10:39:26 GMT"
+                },
+                {
+                  "key": "server",
+                  "value": "Vercel"
+                },
+                {
+                  "key": "strict-transport-security",
+                  "value": "max-age=63072000; includeSubDomains; preload"
+                },
+                {
+                  "key": "x-vercel-cache",
+                  "value": "MISS"
+                },
+                {
+                  "key": "x-vercel-id",
+                  "value": "sin1::iad1::b9ncf-1787222366185-1f6567c8a12e"
+                },
+                {
+                  "key": "content-length",
+                  "value": "114"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"status\": 400,\n    \"message\": \"Key: 'LoginRequest.Email' Error:Field validation for 'Email' failed on the 'email' tag\"\n}"
             }
           ]
         },
@@ -961,6 +1107,78 @@
               ],
               "cookie": [],
               "body": "{\n    \"status\": 409,\n    \"message\": \"category name already exists\"\n}"
+            },
+            {
+              "name": "Forbidden",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n    \"name\": \"Sewa\"\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "https://go-income-expense-tracker-app.vercel.app/api/categories",
+                  "protocol": "https",
+                  "host": [
+                    "go-income-expense-tracker-app",
+                    "vercel",
+                    "app"
+                  ],
+                  "path": [
+                    "api",
+                    "categories"
+                  ]
+                }
+              },
+              "status": "Forbidden",
+              "code": 403,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": ":status",
+                  "value": 403
+                },
+                {
+                  "key": "cache-control",
+                  "value": "public, max-age=0, must-revalidate"
+                },
+                {
+                  "key": "content-type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "date",
+                  "value": "Thu, 20 Aug 2026 14:40:24 GMT"
+                },
+                {
+                  "key": "server",
+                  "value": "Vercel"
+                },
+                {
+                  "key": "strict-transport-security",
+                  "value": "max-age=63072000; includeSubDomains; preload"
+                },
+                {
+                  "key": "x-vercel-cache",
+                  "value": "MISS"
+                },
+                {
+                  "key": "x-vercel-id",
+                  "value": "sin1::iad1::d2cjl-1787236822302-b0efa89fe532"
+                },
+                {
+                  "key": "content-length",
+                  "value": "63"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"status\": 403,\n    \"message\": \"forbidden: insufficient permissions\"\n}"
             }
           ]
         },
@@ -1366,7 +1584,6 @@
             {
               "listen": "test",
               "script": {
-                "type": "text/javascript",
                 "exec": [
                   "pm.test(\"Status code is 200\", function () {",
                   "    pm.response.to.have.status(200);",
@@ -1386,13 +1603,15 @@
                   "pm.test(\"Response time is less than 3000ms\", function () {",
                   "    pm.expect(pm.response.responseTime).to.be.below(3000);",
                   "});"
-                ]
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
               }
             },
             {
               "listen": "prerequest",
               "script": {
-                "type": "text/javascript",
                 "exec": [
                   "const tokenKeys = ['json_web_token_07g4', 'json_web_token_08qw'];",
                   "const token = tokenKeys.map((key) => pm.collectionVariables.get(key)).find(Boolean);",
@@ -1428,13 +1647,35 @@
                   "        pm.request.body.update(JSON.stringify({ name: 'Updated Category' }, null, 2));",
                   "    }",
                   "}"
-                ]
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
               }
             }
           ],
           "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "",
+                  "type": "string"
+                }
+              ]
+            },
             "method": "PUT",
             "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"name\": \"Food New\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
             "url": {
               "raw": "https://go-income-expense-tracker-app.vercel.app/api/categories/:id",
               "protocol": "https",
@@ -1459,7 +1700,7 @@
               "variable": [
                 {
                   "key": "id",
-                  "value": "1"
+                  "value": "5"
                 }
               ]
             }
@@ -1638,6 +1879,93 @@
               ],
               "cookie": [],
               "body": "{\n    \"status\": 409,\n    \"message\": \"category name already exists\"\n}"
+            },
+            {
+              "name": "Forbidden",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n    \"name\": \"Food New\"\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "https://go-income-expense-tracker-app.vercel.app/api/categories/:id",
+                  "protocol": "https",
+                  "host": [
+                    "go-income-expense-tracker-app",
+                    "vercel",
+                    "app"
+                  ],
+                  "path": [
+                    "api",
+                    "categories",
+                    ":id"
+                  ],
+                  "query": [
+                    {
+                      "key": "",
+                      "value": null,
+                      "type": "text",
+                      "disabled": true
+                    }
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "5"
+                    }
+                  ]
+                }
+              },
+              "status": "Forbidden",
+              "code": 403,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": ":status",
+                  "value": 403
+                },
+                {
+                  "key": "cache-control",
+                  "value": "public, max-age=0, must-revalidate"
+                },
+                {
+                  "key": "content-type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "date",
+                  "value": "Thu, 20 Aug 2026 14:41:06 GMT"
+                },
+                {
+                  "key": "server",
+                  "value": "Vercel"
+                },
+                {
+                  "key": "strict-transport-security",
+                  "value": "max-age=63072000; includeSubDomains; preload"
+                },
+                {
+                  "key": "x-vercel-cache",
+                  "value": "MISS"
+                },
+                {
+                  "key": "x-vercel-id",
+                  "value": "sin1::iad1::lw9tx-1787236866779-a557dfa69c30"
+                },
+                {
+                  "key": "content-length",
+                  "value": "63"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"status\": 403,\n    \"message\": \"forbidden: insufficient permissions\"\n}"
             }
           ]
         },
@@ -1880,6 +2208,76 @@
               ],
               "cookie": [],
               "body": "{\n    \"status\": 404,\n    \"message\": \"category not found\"\n}"
+            },
+            {
+              "name": "Forbidden",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "https://go-income-expense-tracker-app.vercel.app/api/categories/:id",
+                  "protocol": "https",
+                  "host": [
+                    "go-income-expense-tracker-app",
+                    "vercel",
+                    "app"
+                  ],
+                  "path": [
+                    "api",
+                    "categories",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "5"
+                    }
+                  ]
+                }
+              },
+              "status": "Forbidden",
+              "code": 403,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": ":status",
+                  "value": 403
+                },
+                {
+                  "key": "cache-control",
+                  "value": "public, max-age=0, must-revalidate"
+                },
+                {
+                  "key": "content-type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "date",
+                  "value": "Thu, 20 Aug 2026 14:41:25 GMT"
+                },
+                {
+                  "key": "server",
+                  "value": "Vercel"
+                },
+                {
+                  "key": "strict-transport-security",
+                  "value": "max-age=63072000; includeSubDomains; preload"
+                },
+                {
+                  "key": "x-vercel-cache",
+                  "value": "MISS"
+                },
+                {
+                  "key": "x-vercel-id",
+                  "value": "sin1::iad1::d28kn-1787236883518-bb91c842c388"
+                },
+                {
+                  "key": "content-length",
+                  "value": "63"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"status\": 403,\n    \"message\": \"forbidden: insufficient permissions\"\n}"
             }
           ]
         }
@@ -5188,6 +5586,18 @@
     },
     {
       "key": "json_web_token_07g4"
+    },
+    {
+      "key": "today_date",
+      "value": ""
+    },
+    {
+      "key": "record_id",
+      "value": ""
+    },
+    {
+      "key": "user_id",
+      "value": ""
     }
   ]
 }
